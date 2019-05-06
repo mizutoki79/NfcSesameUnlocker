@@ -7,8 +7,8 @@ import time
 from threading import Thread, Timer
 import os
 
+# Version 3 of CANDY HOUSE'S Sesame API
 api_endpoint = "https://api.candyhouse.co/public"
-head = {"Content-type": "application/json"}
 
 key_idms = os.environ.get("SESAME_KEY_IDMS")
 key_idms = key_idms.split(';') if key_idms != None else []
@@ -17,7 +17,6 @@ key_uids = os.environ.get("SESAME_KEY_UIDS")
 key_uids = key_uids.split(';') if key_uids != None else []
 print key_uids
 device_id = os.environ.get("SESAME_DEVICE_ID")
-print device_id
 auth_token = os.environ.get("SESAME_AUTH_TOKEN")
 
 # 待ち受けの1サイクル秒
@@ -69,11 +68,9 @@ while True:
         # 共通
         print "sleep{0}seconds".format(str(TIME_wait))
         time.sleep(TIME_wait)
-    # end if
 
     clf.close()
 
-# end while
 
 def control_sesame(device_id, command):
     url_control = "{0}/sesame/{1}".format(api_endpoint, device_id)
