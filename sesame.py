@@ -57,14 +57,8 @@ while True:
             uid = binascii.hexlify(tag._nfcid)
             print uid
             if uid in key_uids:
-                url_control = "{0}/sesame/{1}".format(api_endpoint, device_id)
-                head_control = {"Authorization": auth_token,
-                                "Content-Type": "application/json"}
-                payload_control = {"command": "unlock"}
-                response_control = requests.post(
-                    url_control, headers=head_control, data=json.dumps(payload_control))
-                print json.dumps(payload_control)
-                print response_control.text
+                response_unlock = control_sesame(device_id, "unlock")
+                print response_unlock.text
             break
 
         # 共通
@@ -75,3 +69,12 @@ while True:
     clf.close()
 
 # end while
+
+def control_sesame(device_id, command):
+    url_control = "{0}/sesame/{1}".format(api_endpoint, device_id)
+    head_control = {"Authorization": auth_token,
+                    "Content-Type": "application/json"}
+    payload_control = {"command": command}
+    response_control = requests.post(
+        url_control, headers=head_control, data=json.dumps(payload_control))
+    return response_control
