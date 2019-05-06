@@ -4,7 +4,6 @@ import json
 import binascii
 import nfc
 import time
-from threading import Thread, Timer
 import os
 
 # Version 3 of CANDY HOUSE'S Sesame API
