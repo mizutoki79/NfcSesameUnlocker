@@ -46,7 +46,7 @@ while True:
     # NFC待ち受け開始
     # clf.sense( [リモートターゲット], [検索回数], [検索の間隔] )
     target_res = clf.sense(target_req_nfc, target_req_felica, iterations=int(
-        TIME_cycle//TIME_interval)+1, interval=TIME_interval)
+        TIME_cycle//TIME_interval) + 1, interval=TIME_interval)
 
     if target_res != None:
         print target_res
