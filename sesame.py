@@ -26,6 +26,15 @@ TIME_interval = 0.2
 # タッチされてから次の待ち受けを開始するまで無効化する秒
 TIME_wait = 3
 
+def control_sesame(device_id, command):
+    url_control = "{0}/sesame/{1}".format(api_endpoint, device_id)
+    head_control = {"Authorization": auth_token,
+                    "Content-Type": "application/json"}
+    payload_control = {"command": command}
+    response_control = requests.post(
+        url_control, headers=head_control, data=json.dumps(payload_control))
+    return response_control
+
 # Suica接続リクエストのための準備
 target_req_felica = nfc.clf.RemoteTarget("212F")
 # NFC接続リクエストのための準備
@@ -71,12 +80,3 @@ while True:
 
     clf.close()
 
-
-def control_sesame(device_id, command):
-    url_control = "{0}/sesame/{1}".format(api_endpoint, device_id)
-    head_control = {"Authorization": auth_token,
-                    "Content-Type": "application/json"}
-    payload_control = {"command": command}
-    response_control = requests.post(
-        url_control, headers=head_control, data=json.dumps(payload_control))
-    return response_control
