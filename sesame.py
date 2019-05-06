@@ -32,6 +32,8 @@ def control_sesame(device_id, command):
     payload_control = {"command": command}
     response_control = requests.post(
         url_control, headers=head_control, data=json.dumps(payload_control))
+    if hasattr(response_control, "text"):
+        print response_control.text
     return response_control
 
 if __name__ == "__main__":
@@ -74,9 +76,8 @@ if __name__ == "__main__":
                     idm = binascii.hexlify(tag.idm)
                     print "Felica detected. idm = {0}".format(idm)
                     if idm in key_idms:
-                        response_unlock = control_sesame(device_id, "unlock")
-                        if hasattr(response_unlock, "text"):
-                            print response_unlock.text
+                        response_control = control_sesame(device_id, "unlock")
+
                 # NFC
                 else:
                     if not hasattr(tag, "_nfcid"):
@@ -86,9 +87,7 @@ if __name__ == "__main__":
                     uid = binascii.hexlify(tag._nfcid)
                     print uid
                     if uid in key_uids:
-                        response_unlock = control_sesame(device_id, "unlock")
-                        if hasattr(response_unlock, "text"):
-                            print response_unlock.text
+                        response_control = control_sesame(device_id, "unlock")
 
             # 共通
             print "sleep {0} seconds".format(str(TIME_wait))
