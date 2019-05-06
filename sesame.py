@@ -41,10 +41,7 @@ target_req_felica = nfc.clf.RemoteTarget("212F")
 target_req_nfc = nfc.clf.RemoteTarget("106A")
 
 print "Waiting for NFC..."
-i = 0
 while True:
-    i += 1
-    print i
     # USBに接続されたNFCリーダに接続してインスタンス化
     clf = nfc.ContactlessFrontend("usb")
     # NFC待ち受け開始
@@ -54,28 +51,47 @@ while True:
 
     if target_res != None:
         print target_res
-        tag = nfc.tag.activate(clf, target_res)
-        print tag
+        print vars(target_res)
+        if not hasattr(target_res, "_brty_send"):
+            continue
 
-        # Felica
-        if tag.type == "Type3Tag":
-            tag.sys = 3
-            idm = binascii.hexlify(tag.idm)
-            print "Felica detected. idm = {0}".format(idm)
-            if idm in key_idms:
-                response_unlock = control_sesame(device_id, "unlock")
-                print (response_unlock.text)
-        # NFC
+        brty = target_res._brty_send
+        if brty == "106A":
+            tag = nfc.tag.activate_tt2(clf, target_res)
+        elif brty == "212F":
+            tag = nfc.tag.activate_tt3(clf, target_res)
         else:
-            uid = binascii.hexlify(tag._nfcid)
-            print uid
-            if uid in key_uids:
-                response_unlock = control_sesame(device_id, "unlock")
-                print response_unlock.text
-            break
+            continue
+
+        print tag
+        if tag != None:
+            print vars(tag)
+            print tag.type
+
+            # Felica
+            if hasattr(tag, "type") and tag.type == "Type3Tag":
+                tag.sys = 3
+                idm = binascii.hexlify(tag.idm)
+                print "Felica detected. idm = {0}".format(idm)
+                if idm in key_idms:
+                    response_unlock = control_sesame(device_id, "unlock")
+                    if hasattr(response_unlock, "text"):
+                        print response_unlock.text
+            # NFC
+            else:
+                if not hasattr(tag, "_nfcid"):
+                    print "Error: tag doesn't have nfcid"
+                    continue
+
+                uid = binascii.hexlify(tag._nfcid)
+                print uid
+                if uid in key_uids:
+                    response_unlock = control_sesame(device_id, "unlock")
+                    if hasattr(response_unlock, "text"):
+                        print response_unlock.text
 
         # 共通
-        print "sleep{0}seconds".format(str(TIME_wait))
+        print "sleep {0} seconds".format(str(TIME_wait))
         time.sleep(TIME_wait)
 
     clf.close()
