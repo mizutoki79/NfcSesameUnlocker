@@ -51,7 +51,12 @@ while True:
 
         # Felica
         if tag.type == "Type3Tag":
-            pass
+            tag.sys = 3
+            idm = binascii.hexlify(tag.idm)
+            print "Felica detected. idm = {0}".format(idm)
+            if idm in key_idms:
+                response_unlock = control_sesame(device_id, "unlock")
+                print (response_unlock.text)
         # NFC
         else:
             uid = binascii.hexlify(tag._nfcid)
