@@ -5,6 +5,7 @@ import binascii
 import nfc
 import time
 import os
+from datetime import datetime
 
 # Version 3 of CANDY HOUSE'S Sesame API
 api_endpoint = "https://api.candyhouse.co/public"
@@ -32,9 +33,41 @@ def control_sesame(device_id, command):
     payload_control = {"command": command}
     response_control = requests.post(
         url_control, headers=head_control, data=json.dumps(payload_control))
-    if hasattr(response_control, "text"):
-        print response_control.text
     return response_control
+
+def check_sesame_task(task_id):
+    url_check = "{0}/action-result?task_id={1}".format(api_endpoint, task_id)
+    head_check = {"Authorization": auth_token}
+    response_check = requests.get(url_check, headers=head_check)
+    return response_check
+
+def unlock_sesame(device_id, card_id):
+    response_control = control_sesame(device_id, "unlock")
+    if response_control == None and not hasattr(response_control, "_content"):
+        return False
+
+    # print vars(response_control)
+    response_control_content = json.loads(response_control._content)
+    task_id = response_control_content["task_id"]
+    print "task_id = {0}".format(task_id)
+
+    # TODO: 時間を短くして繰り返し問い合わせる
+    time.sleep(7.0)
+    response_check = check_sesame_task(task_id)
+    if response_check == None and not hasattr(response_check, "_content"):
+        return False
+
+    response_check_content = json.loads(response_check._content)
+    # print response_check_content
+    if response_check_content["status"] == "processing":
+        # TODO: 数秒待ったり何度か問い合わせたりリクエスト投げたり、最悪 sync したり
+        print "processing"
+        pass
+
+    if response_check_content["status"] == "terminated":
+        result = response_check_content["successful"]
+        print "[{0}] card_id: {1} device_id: {2} unlock: {3}".format(datetime.now().strftime("%Y/%m/%d %H:%M:%S"), card_id, device_id, "successful" if result else "failed")
+        return
 
 if __name__ == "__main__":
     # NFC接続リクエストのための準備
@@ -76,7 +109,7 @@ if __name__ == "__main__":
                     idm = binascii.hexlify(tag.idm)
                     print "Felica detected. idm = {0}".format(idm)
                     if idm in key_idms:
-                        response_control = control_sesame(device_id, "unlock")
+                        unlock_sesame(device_id, idm)
 
                 # NFC
                 else:
@@ -85,13 +118,14 @@ if __name__ == "__main__":
                         continue
 
                     uid = binascii.hexlify(tag._nfcid)
-                    print uid
+                    print "NFC detected. uid = {0}".format(uid)
                     if uid in key_uids:
-                        response_control = control_sesame(device_id, "unlock")
+                        unlock_sesame(device_id, uid)
 
             # 共通
             print "sleep {0} seconds".format(str(TIME_wait))
             time.sleep(TIME_wait)
+            # TODO: 自動ロック
 
         clf.close()
 
