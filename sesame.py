@@ -35,10 +35,10 @@ def control_sesame(device_id, command):
         url_control, headers=head_control, data=json.dumps(payload_control))
     return response_control
 
-# Suica接続リクエストのための準備
-target_req_felica = nfc.clf.RemoteTarget("212F")
 # NFC接続リクエストのための準備
 target_req_nfc = nfc.clf.RemoteTarget("106A")
+# Suica接続リクエストのための準備
+target_req_felica = nfc.clf.RemoteTarget("212F")
 
 print "Waiting for NFC..."
 while True:
